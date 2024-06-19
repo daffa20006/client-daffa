@@ -19,7 +19,7 @@ export default {
   name: 'TemperatureAtasHistory',
   setup() {
     const chartRef = ref<HTMLCanvasElement | null>(null);
-    const socket = io('http://localhost:1000');
+    const socket = io('http://localhost:3000');
     let temperatureAtasChart: Chart | undefined;
 
     const createChart = (data: any) => {
@@ -146,7 +146,7 @@ export default {
 
     onMounted(async () => {
       try {
-        const response = await axios.get('http://localhost:1000/api/copy-data');
+        const response = await axios.get('http://localhost:3000/api/copy-data');
         const data = {
           timestamps: response.data.map((row: any) => row.timestamp),
           sensor1_temperature: response.data.map((row: any) => row.sensor1_temperature),

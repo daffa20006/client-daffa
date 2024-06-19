@@ -19,7 +19,7 @@
     name: 'TemperatureBawahHistory',
     setup() {
       const chartRef = ref<HTMLCanvasElement | null>(null);
-      const socket = io('http://localhost:1000');
+      const socket = io('http://localhost:3000');
       let temperatureBawahChart: Chart | undefined;
   
       const createChart = (data: any) => {
@@ -173,7 +173,7 @@
   
       onMounted(async () => {
         try {
-          const response = await axios.get('http://localhost:1000/api/copy-data');
+          const response = await axios.get('http://localhost:3000/api/copy-data');
           const data = {
             timestamps: response.data.map((row: any) => row.timestamp),
             sensor3_temperature: response.data.map((row: any) => row.sensor3_temperature),
