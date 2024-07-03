@@ -40,7 +40,7 @@
 	components: {TemperatureAtas, HumidityAtas, TemperatureBawah, HumidityBawah, TimerTes},
 	methods: {
 	  CopyData() {
-		axios.post('http://localhost:3000/copy-data')
+		axios.post('http://18.138.199.217:3000/copy-data')
 		.then(response => {
 		  if (response.data.success) {
 			alert('Data telah Disimpan');
@@ -54,7 +54,7 @@
 		  });
 		},
 	  ResetData() {
-		axios.post('http://localhost:3000/reset-data')
+		axios.post('http://18.138.199.217:3000/reset-data')
 		.then(response => {
 		  if (response.data.success) {
 			alert('Data telah direset');
