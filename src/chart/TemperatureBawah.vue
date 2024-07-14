@@ -95,9 +95,9 @@
                         minute: 'HH:mm',
                       },
                     },
-             //     ticks: {
-             //     stepSize: 5,
-             //     },
+                    ticks: {
+                    stepSize: 5,
+                    },
                     title: {
                       display: true,
                       text: 'Waktu',
@@ -116,13 +116,13 @@
                     annotations: {
                       threshold: {
                         type: 'line',
-                        yMin: 65,
-                        yMax: 65,
+                        yMin: 60,
+                        yMax: 60,
                         borderColor: '#DE1A1A',
                         borderWidth: 2,
                         borderDash: [6, 6],
                         label: {
-                          content: 'Threshold 65°C',
+                          content: 'Threshold 60°C',
                           display: true,
                           position: 'end',
                         },
@@ -142,32 +142,47 @@
   
       const updateChart = (newData: any) => {
         console.log('Updating chart with data:', newData);
-        if (temperatureBawahChart) {
-          // Merge new data with existing data
-          const existingLabels2 = temperatureBawahChart.data.labels as string[];
-          const existingSensor3Data 
-          = temperatureBawahChart.data.datasets[0].data as number[];
-          const existingSensor4Data = temperatureBawahChart.data.datasets[1].data as number[];
-          const existingSensor5Data = temperatureBawahChart.data.datasets[2].data as number[];
-          const existingSensor6Data = temperatureBawahChart.data.datasets[3].data as number[];
-          
-          const newLabels2 = newData.timestamps.filter(temp => !existingLabels2.includes(temp));
-          const newSensor3Data = newData.sensor3_temperature.filter(temp => !existingSensor3Data.includes(temp));
-          const newSensor4Data = newData.sensor4_temperature.filter(temp => !existingSensor4Data.includes(temp));
-          const newSensor5Data = newData.sensor5_temperature.filter(temp => !existingSensor5Data.includes(temp));
-          const newSensor6Data = newData.sensor6_temperature.filter(temp => !existingSensor6Data.includes(temp));
+          if (temperatureBawahChart && temperatureBawahChart.data) {
+            // Merge new data with existing data
+            let combinedData = (temperatureBawahChart.data.labels as string []).map((timestamp, index) =>({
+            timestamp,
+            sensor3_temperature: temperatureBawahChart?.data.datasets[0].data[index] as number,
+            sensor4_temperature: temperatureBawahChart?.data.datasets[1].data[index] as number,
+            sensor5_temperature: temperatureBawahChart?.data.datasets[2].data[index] as number,
+            sensor6_temperature: temperatureBawahChart?.data.datasets[3].data[index] as number,
+          }));
 
-          const allLabels2 = existingLabels2.concat(newLabels2);
-          const allSensor3Data = existingSensor3Data.concat(newSensor3Data);
-          const allSensor4Data = existingSensor4Data.concat(newSensor4Data);
-          const allSensor5Data = existingSensor5Data.concat(newSensor5Data);
-          const allSensor6Data = existingSensor6Data.concat(newSensor6Data);
-  
-          temperatureBawahChart.data.labels = allLabels2;
-          temperatureBawahChart.data.datasets[0].data = allSensor3Data;
-          temperatureBawahChart.data.datasets[1].data = allSensor4Data;
-          temperatureBawahChart.data.datasets[2].data = allSensor5Data;
-          temperatureBawahChart.data.datasets[3].data = allSensor6Data;
+        const newCombinedData = newData.timestamps.map((timestamp: string, index: number) => ({
+          timestamp,
+          sensor3_temperature: newData.sensor3_temperature[index],
+          sensor4_temperature: newData.sensor4_temperature[index],
+          sensor5_temperature: newData.sensor5_temperature[index],
+          sensor6_temperature: newData.sensor6_temperature[index],
+        }));
+
+        combinedData = combinedData.concat(newCombinedData);
+
+        // Urutkan data berdasarkan timestamp dan hapus duplikasi
+        combinedData = combinedData
+          .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+          .filter((item, index, self) =>
+            index === self.findIndex((t) => t.timestamp === item.timestamp)
+          );
+
+          // Pisahkan kembali data ke dalam array yang berbeda
+          const sortedLabels2 = combinedData.map(item => item.timestamp);
+          const sortedSensor3Data = combinedData.map(item => item.sensor3_temperature);
+          const sortedSensor4Data = combinedData.map(item => item.sensor4_temperature);
+          const sortedSensor5Data = combinedData.map(item => item.sensor5_temperature);
+          const sortedSensor6Data = combinedData.map(item => item.sensor6_temperature);  
+
+          // Update data chart
+          temperatureBawahChart.data.labels = sortedLabels2;
+          temperatureBawahChart.data.datasets[0].data = sortedSensor3Data;
+          temperatureBawahChart.data.datasets[1].data = sortedSensor4Data;
+          temperatureBawahChart.data.datasets[2].data = sortedSensor5Data;
+          temperatureBawahChart.data.datasets[3].data = sortedSensor6Data;
+
           temperatureBawahChart.update();
         }
       };

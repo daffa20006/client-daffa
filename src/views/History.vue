@@ -33,7 +33,7 @@ export default {
   components: {TemperatureAtasHistory, HumidityAtasHistory, TemperatureBawahHistory, HumidityBawahHistory},
   methods: {
     DeleteData() {
-      axios.post('http://localhost:1000/delete-data')
+      axios.post('http://localhost:3000/delete-data')
       .then(response => {
         if (response.data.success) {
           alert('Data telah dihapus');

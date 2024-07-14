@@ -17,10 +17,12 @@
 		  <HumidityBawah/>
 		</div>
 	  </div>
+	  <div class="tombol_3">
+		<button @click="StartData">Mulai</button> 
+	  </div>
 	  <div class="tombol">
 		<button @click="CopyData">Save Data</button> 
 	  </div>
-	  <div></div>
 	  <div class="tombol_2">
 		<button @click="ResetData">Reset Data</button> 
 	  </div>
@@ -40,7 +42,7 @@
 	components: {TemperatureAtas, HumidityAtas, TemperatureBawah, HumidityBawah, TimerTes},
 	methods: {
 	  CopyData() {
-		axios.post('http://localhost:1000/copy-data')
+		axios.post('http://localhost:3000/copy-data')
 		.then(response => {
 		  if (response.data.success) {
 			alert('Data telah Disimpan');
@@ -54,7 +56,7 @@
 		  });
 		},
 	  ResetData() {
-		axios.post('http://localhost:1000/reset-data')
+		axios.post('http://localhost:3000/reset-data')
 		.then(response => {
 		  if (response.data.success) {
 			alert('Data telah direset');
@@ -66,7 +68,22 @@
 			console.error('Error:', error);
 			alert('Ada Error');
 		  });
-		}
+		},
+	  StartData() {
+		axios.post('http://localhost:3000/start-data', {
+        	command: 'start'
+      	  }, {
+        	headers: {
+          		'Content-Type': 'application/json'
+        	}
+      	})
+      	.then(response => {
+        	console.log('Response from backend:', response.data);
+      		})
+      	.catch(error => {
+        	console.error('Error:', error);
+      	});
+	   },
 	  }
 	}
   </script>
@@ -117,6 +134,7 @@
 	width: 6.5%;
 	outline: 1px solid rgb(13, 6, 52);
 	margin-bottom: 10px;
+	text-align: center;
   }
   
   .tombol_2{
@@ -126,6 +144,18 @@
 	box-shadow: - 10px 10px rgba(255, 0, 0, 0.08);
 	width: 6.5%;
 	outline: 1px solid rgb(13, 6, 52);
+	text-align: center;
+  }
+
+  .tombol_3{
+	background: #ffffff;
+	padding: 10px;
+	border-radius: 0px;
+	box-shadow: - 10px 10px rgba(255, 0, 0, 0.08);
+	width: 6.5%;
+	outline: 1px solid rgb(13, 6, 52);
+	margin-bottom: 10px;
+	text-align: center;
   }
   
   

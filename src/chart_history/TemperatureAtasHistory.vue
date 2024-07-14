@@ -71,7 +71,7 @@ export default {
                       minute: 'HH:mm',
                     },
                   },
-                  ticks: {
+                    ticks: {
                     stepSize: 5,
                   },
                   title: {
@@ -92,13 +92,13 @@ export default {
                     annotations: {
                       threshold: {
                         type: 'line',
-                        yMin: 65,
-                        yMax: 65,
+                        yMin: 60,
+                        yMax: 60,
                         borderColor: '#DE1A1A',
                         borderWidth: 2,
                         borderDash: [6, 6],
                         label: {
-                          content: 'Threshold 65°C',
+                          content: 'Threshold 60°C',
                           display: true,
                           position: 'end',
                         },
@@ -118,31 +118,45 @@ export default {
 
     const updateChart = (newData: any) => {
       console.log('Updating chart with data:', newData);
-      if (temperatureAtasChart) {
-        // Merge new data with existing data
-        const existingLabels = temperatureAtasChart.data.labels as string[];
-    const existingSensor1Data = temperatureAtasChart.data.datasets[0].data as number[];
-    const existingSensor2Data = temperatureAtasChart.data.datasets[1].data as number[];
+        if (temperatureAtasChart && temperatureAtasChart.data) {
+          // Gabungkan data lama dan baru
+            let combinedData = (temperatureAtasChart.data.labels as string[]).map((timestamp, index) => ({
+            timestamp,
+            sensor1_temperature: temperatureAtasChart?.data.datasets[0].data[index] as number,
+            sensor2_temperature: temperatureAtasChart?.data.datasets[1].data[index] as number,
+        }));
 
-    // Filter data baru untuk memastikan tidak ada duplikasi
-    const newLabelsToAdd = newData.timestamps.filter(label => !existingLabels.includes(label));
-    const newSensor1DataToAdd = newData.sensor1_temperature.filter(temp => !existingSensor1Data.includes(temp));
-    const newSensor2DataToAdd = newData.sensor2_temperature.filter(temp => !existingSensor2Data.includes(temp));
+    const newCombinedData = newData.timestamps.map((timestamp: string, index: number) => ({
+      timestamp,
+      sensor1_temperature: newData.sensor1_temperature[index],
+      sensor2_temperature: newData.sensor2_temperature[index],
+    }));
 
-    // Gabungkan data baru dengan data yang ada
-    const allLabels = existingLabels.concat(newLabelsToAdd);
-    const allSensor1Data = existingSensor1Data.concat(newSensor1DataToAdd);
-    const allSensor2Data = existingSensor2Data.concat(newSensor2DataToAdd);
+    combinedData = combinedData.concat(newCombinedData);
+
+    // Urutkan data berdasarkan timestamp dan hapus duplikasi
+    combinedData = combinedData
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+      .filter((item, index, self) =>
+        index === self.findIndex((t) => t.timestamp === item.timestamp)
+      );
+
+    // Pisahkan kembali data ke dalam array yang berbeda
+    const sortedLabels = combinedData.map(item => item.timestamp);
+    const sortedSensor1Data = combinedData.map(item => item.sensor1_temperature);
+    const sortedSensor2Data = combinedData.map(item => item.sensor2_temperature);
 
     // Update data chart
-    temperatureAtasChart.data.labels = allLabels;
-    temperatureAtasChart.data.datasets[0].data = allSensor1Data;
-    temperatureAtasChart.data.datasets[1].data = allSensor2Data;
+    temperatureAtasChart.data.labels = sortedLabels;
+    temperatureAtasChart.data.datasets[0].data = sortedSensor1Data;
+    temperatureAtasChart.data.datasets[1].data = sortedSensor2Data;
 
     // Update chart
     temperatureAtasChart.update();
-      }
-    };
+  } else {
+    console.error('temperatureAtasChart is undefined');
+  }
+};
 
     onMounted(async () => {
       try {

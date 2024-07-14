@@ -34,50 +34,26 @@
                 datasets: [
                   {
                     label: 'Sensor 1',
-                    backgroundColor: (context) => {
-                    const value = context.raw as number;
-                    return value > 65 ? '#DE1A1A' : '#009FB7';
-                  },
-                  borderColor: (context) => {
-                    const value = context.raw as number;
-                    return value > 65 ? '#DE1A1A' : '#009FB7';
-                  },
+                    backgroundColor: '#009FB7',
+                    borderColor: '#009FB7',
                     data: data.sensor3_humidity,
                   },
                   {
                     label: 'Sensor 2',
-                    backgroundColor: (context) => {
-                    const value = context.raw as number;
-                    return value > 65 ? '#DE1A1A' : '#04F06A';
-                  },
-                  borderColor: (context) => {
-                    const value = context.raw as number;
-                    return value > 65 ? '#DE1A1A' : '#04F06A';
-                  },
+                    backgroundColor: '#04F06A',
+                    borderColor: '#04F06A',
                     data: data.sensor4_humidity,
                   },
                   {
                     label: 'Sensor 3',
-                    backgroundColor: (context) => {
-                    const value = context.raw as number;
-                    return value > 65 ? '#DE1A1A' : '#FED766';
-                  },
-                  borderColor: (context) => {
-                    const value = context.raw as number;
-                    return value > 65 ? '#DE1A1A' : '#FED766';
-                  },
+                    backgroundColor: '#FED766',
+                    borderColor: '#FED766',
                     data: data.sensor5_humidity,
                   },
                   {
                     label: 'Sensor 4',
-                    backgroundColor: (context) => {
-                    const value = context.raw as number;
-                    return value > 65 ? '#DE1A1A' : '#F8C7CC';
-                  },
-                  borderColor: (context) => {
-                    const value = context.raw as number;
-                    return value > 65 ? '#DE1A1A' : '#F8C7CC';
-                  },
+                    backgroundColor: '#F8C7CC',
+                    borderColor: '#F8C7CC',
                     data: data.sensor6_humidity,
                   },
                 ],
@@ -95,9 +71,9 @@
                         minute: 'HH:mm',
                       },
                     },
-               //     ticks: {
-               //     stepSize: 5,
-               //     },                    
+                      ticks: {
+                      stepSize: 5,
+                      },                    
                     title: {
                       display: true,
                       text: 'Waktu',
@@ -108,25 +84,6 @@
                     title: {
                       display: true,
                       text: 'Kelembapan (%RH)',
-                    },
-                  },
-                },
-                plugins: {
-                  annotation: {
-                    annotations: {
-                      threshold: {
-                        type: 'line',
-                        yMin: 65,
-                        yMax: 65,
-                        borderColor: '#DE1A1A',
-                        borderWidth: 2,
-                        borderDash: [6, 6],
-                        label: {
-                          content: 'Threshold 65°C',
-                          display: true,
-                          position: 'end',
-                        },
-                      },
                     },
                   },
                 },
@@ -142,31 +99,44 @@
   
       const updateChart = (newData: any) => {
         console.log('Updating chart with data:', newData);
-        if (humidityBawahChart) {
+        if (humidityBawahChart && humidityBawahChart.data) {
           // Merge new data with existing data
-          const existingLabelsH2 = humidityBawahChart.data.labels as string[];
-          const existingSensor3HData = humidityBawahChart.data.datasets[0].data as number[];
-          const existingSensor4HData = humidityBawahChart.data.datasets[1].data as number[];
-          const existingSensor5HData = humidityBawahChart.data.datasets[2].data as number[];
-          const existingSensor6HData = humidityBawahChart.data.datasets[3].data as number[];
+          let combinedData = (humidityBawahChart.data.labels as string []).map((timestamp, index) => ({
+            timestamp,
+            sensor3_humidity: humidityBawahChart?.data.datasets[0].data[index] as number,
+            sensor4_humidity: humidityBawahChart?.data.datasets[1].data[index] as number,
+            sensor5_humidity: humidityBawahChart?.data.datasets[2].data[index] as number,
+            sensor6_humidity: humidityBawahChart?.data.datasets[3].data[index] as number,
+          }));
 
-          const newLabelsH2 = newData.timestamps.filter(hum => !existingLabelsH2.includes(hum));
-          const newSensor3HData = newData.sensor3_humidity.filter(hum => !existingSensor3HData.includes(hum));
-          const newSensor4HData = newData.sensor4_humidity.filter(hum => !existingSensor4HData.includes(hum));
-          const newSensor5HData = newData.sensor5_humidity.filter(hum => !existingSensor5HData.includes(hum));   
-          const newSensor6HData = newData.sensor6_humidity.filter(hum => !existingSensor6HData.includes(hum));
+          const newCombinedData = newData.timestamps.map((timestamp: string, index: number) => ({
+          timestamp,
+          sensor3_humidity: newData.sensor3_humidity[index],
+          sensor4_humidity: newData.sensor4_humidity[index],
+          sensor5_humidity: newData.sensor5_humidity[index],
+          sensor6_humidity: newData.sensor6_humidity[index],
+        }));   
+        
+          combinedData = combinedData.concat(newCombinedData);
 
-          const allLabelsH2 = existingLabelsH2.concat(newLabelsH2);
-          const allSensor3HData = existingSensor3HData.concat(newSensor3HData);
-          const allSensor4HData = existingSensor4HData.concat(newSensor4HData);
-          const allSensor5HData = existingSensor5HData.concat(newSensor5HData);
-          const allSensor6HData = existingSensor6HData.concat(newSensor6HData);
+          // Urutkan data berdasarkan timestamp dan hapus duplikasi
+          combinedData = combinedData
+            .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+            .filter((item, index, self) =>
+              index === self.findIndex((t) => t.timestamp === item.timestamp)
+            );
+
+          const sortedLabelsH2 = combinedData.map(item => item.timestamp);
+          const sortedSensor3HData = combinedData.map(item => item.sensor3_humidity);
+          const sortedSensor4HData = combinedData.map(item => item.sensor4_humidity);
+          const sortedSensor5HData = combinedData.map(item => item.sensor5_humidity);
+          const sortedSensor6HData = combinedData.map(item => item.sensor6_humidity);
   
-          humidityBawahChart.data.labels = allLabelsH2;
-          humidityBawahChart.data.datasets[0].data = allSensor3HData;
-          humidityBawahChart.data.datasets[1].data = allSensor4HData;
-          humidityBawahChart.data.datasets[2].data = allSensor5HData;
-          humidityBawahChart.data.datasets[3].data = allSensor6HData;
+          humidityBawahChart.data.labels = sortedLabelsH2;
+          humidityBawahChart.data.datasets[0].data = sortedSensor3HData;
+          humidityBawahChart.data.datasets[1].data = sortedSensor4HData;
+          humidityBawahChart.data.datasets[2].data = sortedSensor5HData;
+          humidityBawahChart.data.datasets[3].data = sortedSensor6HData;
           humidityBawahChart.update();
         }
       };
