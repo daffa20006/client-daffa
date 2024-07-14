@@ -19,7 +19,7 @@
     name: 'HumidityBawah',
     setup() {
       const chartRef = ref<HTMLCanvasElement | null>(null);
-      const socket = io('http://localhost:3000');
+      const socket = io('http://18.138.199.217:3000');
       let humidityBawahChart: Chart | undefined;
   
       const createChart = (data: any) => {
@@ -143,7 +143,7 @@
   
       onMounted(async () => {
         try {
-          const response = await axios.get('http://localhost:3000/api/sensor-data');
+          const response = await axios.get('http://18.138.199.217:3000/api/sensor-data');
           const data = {
             timestamps: response.data.map((row: any) => row.timestamp),
             sensor3_humidity: response.data.map((row: any) => row.sensor3_humidity),
