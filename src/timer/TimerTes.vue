@@ -109,7 +109,7 @@ export default {
         },
         async checkForData() {
             try {
-                const response = await axios.get('http://localhost:3000/api/sensor-data'); // Adjust to your API URL
+                const response = await axios.get('http://18.138.199.217:3000/api/sensor-data'); // Adjust to your API URL
 
                 if (response.data.length > 0) { // Check if there is data from sensors
                     const latestData = response.data[response.data.length - 1]; // Get the latest data
